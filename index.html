@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý nhân sự</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+
+    <link rel="stylesheet" href="assets/vendors/iconly/bold.css">
+	
+    <link rel="stylesheet" href="assets/vendors/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
+	<link rel="stylesheet" href="assets/vendors/simple-datatables/style.css">
+	<link rel="stylesheet" href="assets/css/bootstrap-datepicker.min.css">
+	 <link rel="stylesheet" href="assets/css/header.css">
+	 <!-- THƯ VIỆN APEXCHARTS -->
+    <script src="assets/js/apexcharts.js"></script>
+    
+    <style>
+        /* CSS Tùy chỉnh nhanh */
+        .navbar-brand img { height: 40px; }
+        .hero-section { 
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('./assets/images/tuonglai.jpg') no-repeat center center;
+            background-size: cover;
+            min-height: 50vh;
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card { transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <img src="./assets/images/logo/logohrm.png" style="height: 70px;" alt="Logo Công ty SerenaTech">
+                    <span class="fw-bold text-primary ms-2">Công Ty SerenaTech</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#trangchu">Trang Chủ</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="gioiThieuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Giới thiệu
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="gioiThieuDropdown">
+                                <li><a class="dropdown-item" href="#vechungtoi">Về chúng tôi</a></li>
+                                <li><a class="dropdown-item" href="#su-menh">Tầm nhìn & Sứ mệnh</a></li>
+                                <li><a class="dropdown-item" href="#doi-ngu">Đội ngũ</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#dichvu">Sản phẩm/Dịch vụ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#lienhe">Liên hệ</a>
+                        </li>
+						
+                        <li class="nav-item ms-lg-3">
+                            <a href="tra-cuu-nhan-vien.php" class="btn btn-primary shadow-lg">Tra cứu nhân viên</a>
+                        </li>
+						<li class="nav-item ms-lg-3">
+                            <a href="login.php" class="btn btn-primary shadow-lg">Đăng nhập</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main style="padding-top: 70px;">
+        <section id="trangchu" class="hero-section text-center d-flex align-items-center">
+            <div class="container">
+                <h1 class="display-3 fw-bold animate__animated animate__fadeInDown"></h1>
+                <p class="lead my-4 animate__animated animate__fadeInUp">
+                    Công ty SerenaTech cam kết mang đến các giải pháp công nghệ tiên tiến, nâng cao giá trị cuộc sống.
+                </p>
+                <a href="#vechungtoi" class="btn btn-lg btn-warning shadow-lg me-3 animate__animated animate__zoomIn">Khám Phá Thêm</a>
+            </div>
+        </section>
+
+        <section id="vechungtoi" class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5 text-primary">Về chúng tôi</h2>
+                
+                <div class="row g-4 mb-5 text-center">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm feature-card">
+                            <div class="card-body">
+                                <i class="fas fa-users display-4 text-warning mb-3"></i>
+                                <h3 class="fw-bold">150+</h3>
+                                <p class="text-muted">Nhân sự chuyên môn cao</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm feature-card">
+                            <div class="card-body">
+                                <i class="fas fa-trophy display-4 text-success mb-3"></i>
+                                <h3 class="fw-bold">10 năm</h3>
+                                <p class="text-muted">Kinh nghiệm phát triển</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm feature-card">
+                            <div class="card-body">
+                                <i class="fas fa-globe display-4 text-info mb-3"></i>
+                                <h3 class="fw-bold">20+</h3>
+                                <p class="text-muted">Dự án toàn cầu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="text-secondary">Tầm nhìn và giá trị cốt lõi</h4>
+                        <p>Công ty SerenaTech được thành lập năm 2015 với sứ mệnh trở thành đối tác tin cậy hàng đầu trong lĩnh vực... Chúng tôi luôn đặt chất lượng và sự đổi mới lên hàng đầu.</p>
+                        <p><strong>Giá trị cốt lõi:</strong> Đổi mới, chính trực, khách hàng là trọng tâm.</p>
+                        <a href="#su-menh" class="btn btn-outline-primary">Xem chi tiết sứ mệnh</a>
+                    </div>
+                    <div class="col-md-6 mt-4 mt-md-0 text-center">
+                        <img src="./assets/images/nhansu.jpg" class="img-fluid rounded shadow-lg" alt="Văn phòng làm việc">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="dichvu" class="py-5">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5 text-primary">Sản phẩm & Dịch vụ cốt lõi</h2>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-code display-5 text-danger mb-3"></i>
+                                <h5 class="card-title fw-bold">Phát triển phần mềm</h5>
+                                <p class="card-text text-muted">Cung cấp các giải pháp phần mềm tùy chỉnh, đáp ứng mọi yêu cầu quản lý và vận hành doanh nghiệp.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-cloud display-5 text-primary mb-3"></i>
+                                <h5 class="card-title fw-bold">Dịch Vụ Cloud & Data</h5>
+                                <p class="card-text text-muted">Tối ưu hóa hạ tầng đám mây và phân tích dữ liệu lớn để đưa ra quyết định kinh doanh đột phá.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow feature-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-shield-alt display-5 text-warning mb-3"></i>
+                                <h5 class="card-title fw-bold">Bảo mật hệ thống</h5>
+                                <p class="card-text text-muted">Đảm bảo an toàn thông tin với các giải pháp bảo mật đa lớp, phòng chống mọi mối đe dọa mạng.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lienhe" class="py-5 bg-primary text-white">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5">Liên hệ với chúng tôi</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="fw-bold">Thông tin liên hệ</h4>
+                        <p><i class="fas fa-map-marker-alt me-2"></i> **Địa chỉ:** Tầng 10, Tòa nhà SerenaTech, 123 Đường Công Nghệ, Hà Nội</p>
+                        <p><i class="fas fa-phone me-2"></i> **Điện thoại:** (024) 1234 5678</p>
+                        <p><i class="fas fa-envelope me-2"></i> **Email:** contact@congtySerenaTech.vn</p>
+                        <div class="mt-4 map-container">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.385759715014!2d105.79426617502755!3d21.01859948062143!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab7a7187900b%3A0x286940842247f035!2zSGFub2kgVG93ZXI!5e0!3m2!1svi!2s!4v1700812345678" width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-4 mt-md-0">
+                        <h4 class="fw-bold">Gửi yêu cầu cho chúng tôi</h4>
+                        <form action="send_contact.php" method="POST">
+                            <div class="mb-3 mt-4">
+                                <input type="text" class="form-control" name="name" placeholder="Họ và tên" required>
+                            </div>
+                            <div class="mb-3 mt-4">
+                                <input type="email" class="form-control" name="email" placeholder="Email của bạn" required>
+                            </div>
+                            <div class="mb-3 mt-4">
+                                <textarea class="form-control" name="message" rows="4" placeholder="Nội dung yêu cầu" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning shadow-lg float-end mt-4">Gửi yêu cầu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2025 Công ty SerenaTech</p>
+        </div>
+    </footer>
+
+      <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+     <script src="assets/js/main.js"></script>
+    <script src="assets/js/pages/dashboard.js"></script>
+   
+	<script src="assets/vendors/simple-datatables/simple-datatables.js"></script>
+	<script src="assets/js/sweetalert2.js"></script>
+	<script src="assets/js/alert-handler.js"></script>
+	<script src="assets/js/validator-tooltip.js"></script>
+
+</body>
+</html>
