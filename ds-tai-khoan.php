@@ -99,7 +99,7 @@
                                                 <span class="badge bg-danger"><i class="bi bi-lock-fill me-1"></i>Đã khóa</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?= htmlspecialchars(date('d/m/Y', strtotime($acc['ngaytao'] ?? ''))) ?></td>
+                                        <td><?= !empty($acc['ngaytao']) ? htmlspecialchars(date('d/m/Y', strtotime($acc['ngaytao']))) : '---' ?></td>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <a href="<?php

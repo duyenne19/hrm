@@ -75,8 +75,8 @@ $ds_congtac = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </td>
                             <td>
                                 <div class="d-flex flex-column small">
-                                    <span><i class="bi bi-calendar-event text-success me-1"></i> Bắt đầu: <strong><?= date('d/m/Y', strtotime($ct['bdau_ctac'])) ?></strong></span>
-                                    <span><i class="bi bi-calendar-check text-danger me-1"></i> Kết thúc: <strong><?= date('d/m/Y', strtotime($ct['kthuc_ctac'])) ?></strong></span>
+                                    <span><i class="bi bi-calendar-event text-success me-1"></i> Bắt đầu: <strong><?= !empty($ct['bdau_ctac']) ? date('d/m/Y', strtotime($ct['bdau_ctac'])) : '---' ?></strong></span>
+                                    <span><i class="bi bi-calendar-check text-danger me-1"></i> Kết thúc: <strong><?= !empty($ct['kthuc_ctac']) && $ct['kthuc_ctac'] != '0000-00-00' ? date('d/m/Y', strtotime($ct['kthuc_ctac'])) : '<span class="text-success small fst-italic">Đang công tác</span>' ?></strong></span>
                                 </div>
                             </td>
                             <td class="text-center">

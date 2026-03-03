@@ -80,7 +80,7 @@ $row_acc = $_SESSION['user'];
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="bi bi-clock"></i></span>
                                         <input type="text" class="form-control bg-light" readonly
-                                               value="<?= $bangcapInfo['ngaytao'] ?? date('Y-m-d') ?>">
+                                               value="<?= isset($bangcapInfo['ngaytao']) ? date('d/m/Y', strtotime($bangcapInfo['ngaytao'])) : date('d/m/Y') ?>">
                                     </div>
                                 </div>
                             </div>

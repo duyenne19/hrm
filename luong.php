@@ -88,11 +88,14 @@ include('./view/luong-view-action.php');
         <div class="row match-height">
             <div class="col-12">
                 <div class="card shadow border-0 mb-4">
-                    <div class="card-header bg-white border-bottom">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                         <h5 class="text-primary fw-bold mb-0">
                             <i class="<?= isset($idEdit) ? 'bi bi-pencil-square' : 'bi bi-calculator' ?> me-2"></i>
                             <?= isset($idEdit) ? 'Chỉnh sửa phiếu lương' : 'Tính lương tháng mới' ?>
                         </h5>
+                        <a href="import-luong-tu-file.php" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Nhập từ Excel
+                        </a>
                     </div>
                     <div class="card-body mt-3">
                         <form id="formLuong" class="validate-tooltip" method="post" action="action/luong-action.php">
@@ -722,9 +725,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // ----------------------------------------------------
     if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
     
-		// Tính toán ngày giới hạn: Ngày cuối cùng của tháng trước
-		var lastDayOfPreviousMonth = new Date();
-		lastDayOfPreviousMonth.setDate(0); 
+		// Tính toán ngày giới hạn: Ngày hiện tại
+		// var lastDayOfPreviousMonth = new Date();
+		// lastDayOfPreviousMonth.setDate(0); 
 
 		$('.date-picker-month').datepicker({
 			// Cấu hình quan trọng nhất để chỉ chọn Tháng/Năm
@@ -739,8 +742,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			autoclose: true,         // Tự động đóng sau khi chọn
 			language: 'vi',          // Sử dụng bản Tiếng Việt
 			
-			// Giới hạn ngày chọn: Chỉ chọn được đến tháng trước
-			endDate: lastDayOfPreviousMonth,
+			// Giới hạn ngày chọn: Đến thời điểm hiện tại
+			endDate: '+0d',
 			
 		}); 
 	}

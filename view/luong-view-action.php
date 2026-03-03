@@ -86,7 +86,8 @@
 	// Tìm kiếm từ tháng XX -> đến thang XX *******************************************************************
 	
 	$default_from_month = date('Y-m', strtotime('-1 month'));
-	$default_to_month = date('Y-m', strtotime('-1 month'));
+	$default_to_month = date('Y-m'); // Mặc định đến tháng hiện tại
+	
 	$from_date = $default_from_month . '-01';
 	$to_date = date('Y-m-t', strtotime($default_to_month . '-01'));
 	$filter_id_pb = $_GET['filter_id_pb'] ?? 0;

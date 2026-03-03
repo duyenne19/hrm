@@ -86,6 +86,12 @@
 	// ===================
 	if (isset($_POST['update'])) {
 		$id = intval($_POST['id']);
+
+		// Helper lấy giá trị null nếu rỗng
+		$getOpt = function($key) {
+			return (isset($_POST[$key]) && $_POST[$key] !== '') ? $_POST[$key] : null;
+		};
+
 		$data = [
 			
 			'anhdaidien'   => $anhdaidien,
@@ -94,20 +100,20 @@
 			'email'        => $_POST['email'],
 			'gtinh'        => $_POST['gioi_tinh'],
 			'ngsinh'       => $_POST['ngaysinh'],
-			'noisinh'      => $_POST['noisinh'],
+			'noisinh'      => $getOpt('noisinh'),
 			
-			'id_honnhan'   => $_POST['hon_nhan'],
+			'id_honnhan'   => $getOpt('hon_nhan'),
 			'so_cccd'      => $_POST['cmnd'],
-			'noicap_cccd'  => $_POST['noicap'],
-			'ngaycap_cccd' => $_POST['ngaycap'],
-			'id_quoctich'  => $_POST['quoc_tich'],
-			'id_tongiao'   => $_POST['ton_giao'],
-			'id_dantoc'    => $_POST['dan_toc'],
-			'hokhau'       => $_POST['hokhau'],
-			'tamtru'       => $_POST['tamtru'],
+			'noicap_cccd'  => $getOpt('noicap'),
+			'ngaycap_cccd' => $getOpt('ngaycap'),
+			'id_quoctich'  => $getOpt('quoc_tich'),
+			'id_tongiao'   => $getOpt('ton_giao'),
+			'id_dantoc'    => $getOpt('dan_toc'),
+			'hokhau'       => $getOpt('hokhau'),
+			'tamtru'       => $getOpt('tamtru'),
 			'id_loainv'    => $_POST['loai_nv'],
-			'id_trinhdo'   => $_POST['trinh_do'],
-			'id_chuyenmon' => $_POST['chuyen_mon'],
+			'id_trinhdo'   => $getOpt('trinh_do'),
+			'id_chuyenmon' => $getOpt('chuyen_mon'),
 			
 			'id_phongban'  => $_POST['phong_ban'],
 			'id_chucvu'    => $_POST['chuc_vu'],
