@@ -20,6 +20,13 @@
 
 <div class="page-heading">
     <!-- HIỂN THỊ THÔNG BÁO LỖI/THÀNH CÔNG -->
+    <?php if (isset($_GET['msg'])): ?>
+        <div class="alert alert-<?= (isset($_GET['status']) && $_GET['status'] == 'success') ? 'success' : 'danger' ?> alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-<?= (isset($_GET['status']) && $_GET['status'] == 'success') ? 'check-circle-fill' : 'exclamation-triangle-fill' ?> me-2"></i><?= htmlspecialchars(urldecode($_GET['msg'])) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <?php if (isset($_SESSION['success'])): ?>
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i><?= $_SESSION['success'] ?>

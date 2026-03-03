@@ -124,8 +124,8 @@
 	// ==========================
 	// XÓA NHÂN VIÊN
 	// ==========================
-	if (isset($_GET['delete'])) {
-		$id = intval($_GET['delete']);
+	if (isset($_GET['delete_id'])) {
+		$id = intval($_GET['delete_id']);
 		$result = $nhanvien->delete($id);
 
 		$status = $result['success'] ? 'success' : 'fail';
