@@ -127,8 +127,8 @@
 	}
 
 	// ✅ Xóa tài khoản
-	if (isset($_GET['delete_id'])) {
-		$id = (int)$_GET['delete_id'];
+	if (isset($_GET['delete_id']) || isset($_GET['delete'])) {
+		$id = isset($_GET['delete_id']) ? (int)$_GET['delete_id'] : (int)$_GET['delete'];
 		$result = $taiKhoan->delete($id);
 
 		if ($result['success']) {

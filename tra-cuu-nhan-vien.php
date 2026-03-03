@@ -81,8 +81,8 @@ include(__DIR__ . '/action/tra-cuu-nhan-vien-action.php');
 						<section id="basic-vertical-layouts">
 							<div class="row match-height">
 								<div class="col-12">
-									<div class="card shadow-sm">
-										<div class="card-header text-center pt-4 pb-0">
+									<div class="card shadow border-0">
+										<div class="card-header text-center pt-4 pb-0 bg-white">
 											<h3 class="text-primary fw-bold mb-0">HỆ THỐNG TRA CỨU THÔNG TIN NHÂN SỰ</h3>
 										</div>
 										<div class="card-body">

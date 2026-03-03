@@ -30,10 +30,10 @@
 
             <!-- Form thêm / sửa -->
             <div class="col-md-6 col-12">
-                <div class="card shadow-sm">
+                <div class="card shadow border-0">
                     <div class="card-header">
                         <h5 class="text-primary fw-bold mb-0">
-                            <i class="bi bi-person-plus-fill me-2"></i>
+                            <i class="bi bi-award me-2"></i>
                             <?= isset($idEdit) ? 'Chỉnh sửa trình độ' : 'Thêm trình độ mới' ?>
                         </h5>
                     </div>
@@ -87,7 +87,7 @@
 
             <!-- Danh sách -->
             <div class="col-md-6 col-12">
-                <div class="card shadow-sm">
+                <div class="card shadow border-0">
                     <div class="card-body">
                         <h5 class="fw-bold text-primary mb-3">📋 Danh sách trình độ</h5>
                         <table class="table table-hover text-center" id="tableTrinhdo">

@@ -6,10 +6,9 @@
 			<footer>
                 <div class="footer clearfix mb-0 text-muted">
                     <div class="float-start">
-                        <p>2025 &copy; Quản Lý Nhân Sự</p>
+                        <p>2026 &copy; Quản Lý Nhân Sự</p>
                     </div>
                     <div class="float-end">
-                        <p>Phát triển bởi <span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span><a href="#">Nguyễn Thảo</a></p>
                     </div>
                 </div>
             </footer>

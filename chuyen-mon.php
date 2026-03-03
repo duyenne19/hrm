@@ -12,10 +12,10 @@ $row_acc = $_SESSION['user'];
 
             <!-- FORM -->
             <div class="col-md-6 col-12">
-                <div class="card shadow-sm">
+                <div class="card shadow border-0">
                     <div class="card-header">
                         <h5 class="text-primary fw-bold mb-0">
-						<i class="bi bi-person-plus-fill me-2"></i>
+						<i class="bi bi-briefcase me-2"></i>
 
                             <?= isset($chuyenmonInfo) ? 'Chỉnh sửa chuyên môn' : 'Thêm chuyên môn mới' ?>
                         </h5>
@@ -70,7 +70,7 @@ $row_acc = $_SESSION['user'];
 
             <!-- DANH SÁCH -->
             <div class="col-md-6 col-12">
-                <div class="card shadow-sm">
+                <div class="card shadow border-0">
                     <div class="card-body">
                         <h5 class="fw-bold text-primary mb-3">📋 Danh sách chuyên môn</h5>
                         <table class="table table-hover text-center" id="tableChuyenMon">

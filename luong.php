@@ -67,17 +67,34 @@ include('./view/luong-view-action.php');
     }
 </style>
 <div class="page-heading">
+    <div class="page-title mb-3">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>Quản lý Lương Nhân Viên</h3>
+                <p class="text-subtitle text-muted">Tính lương, xem lịch sử và xuất báo cáo lương.</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Lương</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
     <section id="basic-vertical-layouts">        
         <div class="row match-height">
             <div class="col-12">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-white border-bottom">
                         <h5 class="text-primary fw-bold mb-0">
-                            <i class="bi bi-file-text me-2"></i>
-                            <?= isset($idEdit) ? 'Chỉnh lương nhân viên' : 'Tính lương nhân viên' ?>
+                            <i class="<?= isset($idEdit) ? 'bi bi-pencil-square' : 'bi bi-calculator' ?> me-2"></i>
+                            <?= isset($idEdit) ? 'Chỉnh sửa phiếu lương' : 'Tính lương tháng mới' ?>
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body mt-3">
                         <form id="formLuong" class="validate-tooltip" method="post" action="action/luong-action.php">
                             <input type="hidden" name="id" value="<?= $luongInfo['id'] ?? '' ?>">
                             
@@ -87,13 +104,17 @@ include('./view/luong-view-action.php');
 
                             <div class="row">
                                 <div class="col-md-2 mb-3">
-                                    <label>Mã lương</label>
-                                    <input type="text" name="ma_luong" class="form-control" 
-                                        value="<?= $luongInfo['ma_luong'] ?? $maLuong ?>" readonly>
+                                    <label class="fw-bold mb-1">Mã lương</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
+                                        <input type="text" name="ma_luong" class="form-control bg-light" 
+                                            value="<?= $luongInfo['ma_luong'] ?? $maLuong ?>" readonly>
+                                    </div>
                                 </div>
 								
                                 <div class="col-md-3 mb-3">
-                                    <label>Phòng Ban <span class="text-danger">*</span></label>
+                                    <label class="fw-bold mb-1">Phòng Ban <span class="text-danger">*</span></label>
+                                    <div class="choices-container">
 										<select name="id_pb" id="selectPhongBan" class="form-select select2" required 
 											<?= isset($idEdit) ? 'disabled' : '' ?>>
 											<option value="">-- Chọn Phòng ban --</option>
@@ -111,70 +132,92 @@ include('./view/luong-view-action.php');
 										<?php if (isset($idEdit)): ?>
 											<input type="hidden" name="id_pb" value="<?= $selected_id_pb ?>">
 										<?php endif; ?>
+                                    </div>
                                 </div>
 								
                                 <div class="col-md-3 mb-3">
-                                    <label>Nhân viên <span class="text-danger">*</span></label>
-                                    <select name="id_nv" id="selectNhanVien" class="form-select select2" required 
-                                        <?= isset($idEdit) ? 'readonly disabled' : '' ?>>
-                                        <option value="">-- Chọn Nhân viên --</option>
-                                        <?php 
-                                        foreach ($arrNhanVien as $nv):
-                                            $isSelected = ($selected_id_nv == $nv['id']) ? 'selected' : '';
-                                        ?>
-                                            <option value="<?= $nv['id'] ?>" <?= $isSelected ?>>
-                                                <?= htmlspecialchars($nv['hoten']) ?></b> [ <?= htmlspecialchars($nv['chucvu'] ?? 'N/A') ?> ]
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                    <label class="fw-bold mb-1">Nhân viên <span class="text-danger">*</span></label>
+                                    <div class="choices-container">
+                                        <select name="id_nv" id="selectNhanVien" class="form-select select2" required 
+                                            <?= isset($idEdit) ? 'readonly disabled' : '' ?>>
+                                            <option value="">-- Chọn Nhân viên --</option>
+                                            <?php 
+                                            foreach ($arrNhanVien as $nv):
+                                                $isSelected = ($selected_id_nv == $nv['id']) ? 'selected' : '';
+                                            ?>
+                                                <option value="<?= $nv['id'] ?>" <?= $isSelected ?>>
+                                                    <?= htmlspecialchars($nv['hoten']) ?> [ <?= htmlspecialchars($nv['chucvu'] ?? 'N/A') ?> ]
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                     <?php if (isset($idEdit) || isset($_GET['id_nv'])): ?>
                                         <input type="hidden" name="id_nv" value="<?= $selected_id_nv ?>">
                                     <?php endif; ?>
                                 </div>
                                 
-                                <div class="col-md-2 mb-3">
-                                    <label>Lương cơ bản <span class="text-danger">*</span></label>
-                                    <input type="text" id="luongCoBanDisplay" class="form-control number-format" required readonly
-                                        value="<?= number_format($luongCoBan) ?>">
-                                    <small class="text-muted"><b>Hệ số lương:</b> <?= $heSoLuong ?> | <b>Hệ số phụ cấp:</b> <?= $heSoPhuCap ?></small>
+                                <div class="col-md-4 mb-3">
+                                    <label class="fw-bold mb-1">Lương cơ bản (VNĐ) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light fw-bold text-success">$</span>
+                                        <input type="text" id="luongCoBanDisplay" class="form-control bg-light fw-bold text-end" required readonly
+                                            value="<?= number_format($luongCoBan) ?>">
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1 px-1 small">
+                                        <span class="text-muted"><i class="bi bi-x"></i> HS Lương: <strong><?= $heSoLuong ?></strong></span>
+                                        <span class="text-muted"><i class="bi bi-plus"></i> HS Phụ cấp: <strong><?= $heSoPhuCap ?></strong></span>
+                                    </div>
                                 </div>
-                                
-                               
                             </div>
                             
                             <div class="row">
-								<div class="col-md-2 mb-3">
-                                    <label>Tháng tính lương </label>
-                                    <input type="text"  name="ky_luong_display" id="thangTinhLuong" class="form-control date-picker-month" required <?= isset($idEdit) ? 'disabled' : 'readonly' ?>   
-										<?php if (!isset($idEdit)): ?>
-											style="background-color: white !important;"
-										<?php endif; ?>
-                                        value="<?= $thangTinhLuongValue ?>">
+								<div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Tháng lương</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-month"></i></span>
+                                        <input type="text" name="ky_luong_display" id="thangTinhLuong" 
+                                            class="form-control date-picker-month" required 
+                                            <?= isset($idEdit) ? 'disabled' : 'readonly' ?>   
+                                            style="background-color: white !important;"
+                                            value="<?= $thangTinhLuongValue ?>">
+                                    </div>
                                 </div>
-                                <div class="col-md-2 mb-3">
-                                    <label>Ngày công <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.5" name="ngay_cong" class="form-control" required
-                                        value="<?= $luongInfo['ngay_cong'] ?? 26 ?>">
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Ngày công <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                                        <input type="number" step="0.5" name="ngay_cong" class="form-control" required
+                                            placeholder="VD: 26"
+                                            value="<?= $luongInfo['ngay_cong'] ?? 26 ?>">
+                                    </div>
                                 </div>
                                 
-                                <div class="col-md-2 mb-3">
-                                    <label>Tạm ứng</label>
-                                    <input type="text" name="tam_ung_display" id="tamUngDisplay" class="form-control number-format" 
-                                        value="<?= number_format($luongInfo['tam_ung'] ?? 0) ?>">
-                                    <input type="hidden" name="tam_ung" id="tamUngValue" value="<?= $luongInfo['tam_ung'] ?? 0 ?>">
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Tạm ứng (VNĐ)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-cash-coin"></i></span>
+                                        <input type="text" name="tam_ung_display" id="tamUngDisplay" class="form-control number-format" 
+                                            placeholder="Nhập số tiền..."
+                                            value="<?= number_format($luongInfo['tam_ung'] ?? 0) ?>">
+                                        <input type="hidden" name="tam_ung" id="tamUngValue" value="<?= $luongInfo['tam_ung'] ?? 0 ?>">
+                                    </div>
                                 </div>
                                 
-                                <div class="col-md-6 d-flex align-items-end mb-3">
-                                    <?php if (isset($idEdit)): ?>
-                                        <button type="submit" name="update" class="btn btn-primary me-2">
-                                            <i class="bi bi-save"></i> Cập nhật lương
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="submit" name="add" class="btn btn-success me-2">
-                                            <i class="bi bi-plus-circle"></i> Thêm mới lương
-                                        </button>
-                                    <?php endif; ?>
-                                    <a href="luong.php" class="btn btn-light">Làm mới</a>
+                                <div class="col-md-3 d-flex align-items-end mb-3">
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end w-100">
+                                        <?php if (isset($idEdit)): ?>
+                                            <button type="submit" name="update" class="btn btn-primary shadow-sm flex-grow-1">
+                                                <i class="bi bi-save me-1"></i> Cập nhật
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="submit" name="add" class="btn btn-success shadow-sm flex-grow-1">
+                                                <i class="bi bi-plus-lg me-1"></i> Thêm mới
+                                            </button>
+                                        <?php endif; ?>
+                                        <a href="luong.php" class="btn btn-light-secondary shadow-sm" title="Làm mới">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -183,98 +226,122 @@ include('./view/luong-view-action.php');
             </div>
 
             <div class="col-12">
-                <div class="card shadow-sm">
+                <div class="card shadow border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-						<h5 class="fw-bold text-primary mb-0">
-							📋 Danh sách lương (<?= $display_month ?>)
-						</h5>
-						
-						<div class="d-flex">
-							<button id="btnPrintDanhSach" class="btn btn-sm btn-outline-primary me-2">
-								<i class="bi bi-printer"></i> In Danh sách
-							</button>
-							<button id="btnExportExcel" class="btn btn-sm btn-success">
-								<i class="bi bi-file-earmark-excel"></i> Xuất Excel
-							</button>
-						</div>
-					</div>
-                      
-                        <div class="row mb-3">
-							<div class="col-md-3 mb-3">
-                                    <label>Phòng Ban</label>
-										<select name="filter_id_pb" id="filter_selectPhongBan" class="form-select select2">
-											<option value="0">-- Chọn Phòng ban --</option>
-											<?php 
-												 
-												
-												foreach ($filter_arrPhongBan as $pb):
-													$isSelected = ($pb['id'] == $filter_id_pb) ? 'selected' : '';
-													
-											?>
-													<option value="<?= $pb['id'] ?>" <?= $isSelected ?>>
-														<?= htmlspecialchars($pb['ten_bp']) ?>
-													</option>
-												<?php endforeach; ?>
-										</select>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold text-primary mb-0">
+                                <i class="bi bi-table me-2"></i>Danh sách lương (<?= $display_month ?>)
+                            </h5>
+                            
+                            <div class="d-flex gap-2">
+                                <button id="btnPrintDanhSach" class="btn btn-outline-primary shadow-sm btn-sm">
+                                    <i class="bi bi-printer me-1"></i> In Danh sách
+                                </button>
+                                <button id="btnExportExcel" class="btn btn-success shadow-sm btn-sm">
+                                    <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Section -->
+                        <div class="bg-light p-3 rounded mb-4 border">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="fw-bold mb-1 small">Lọc theo Phòng Ban</label>
+                                    <div class="choices-container">
+                                        <select name="filter_id_pb" id="filter_selectPhongBan" class="form-select select2">
+                                            <option value="0">-- Tất cả Phòng ban --</option>
+                                            <?php 
+                                                foreach ($filter_arrPhongBan as $pb):
+                                                    $isSelected = ($pb['id'] == $filter_id_pb) ? 'selected' : '';
+                                            ?>
+                                                    <option value="<?= $pb['id'] ?>" <?= $isSelected ?>>
+                                                        <?= htmlspecialchars($pb['ten_bp']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
-								
-                             <div class="col-md-2">
-                                 <label>Xem từ tháng</label>
-                                 <input type="text" id="filterFromMonth" class="form-control date-picker-month" value="<?= date('m/Y', strtotime($from_date)) ?>" readonly style="background-color: white !important;">
-                             </div>
-                             <div class="col-md-2">
-                                 <label>Đến tháng</label>
-                                 <input type="text" id="filterToMonth" class="form-control date-picker-month" value="<?= date('m/Y', strtotime($to_date)) ?>" readonly style="background-color: white !important;">
-                             </div>
-                             <div class="col-md-3 d-flex align-items-end">
-                                 <button type="button" id="btnFilterLuong" class="btn btn-info">Lọc</button>
-                             </div>
+                                
+                                <div class="col-md-3">
+                                    <label class="fw-bold mb-1 small">Từ tháng</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-range"></i></span>
+                                        <input type="text" id="filterFromMonth" class="form-control date-picker-month" 
+                                            value="<?= date('m/Y', strtotime($from_date)) ?>" readonly style="background-color: white !important;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="fw-bold mb-1 small">Đến tháng</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                        <input type="text" id="filterToMonth" class="form-control date-picker-month" 
+                                            value="<?= date('m/Y', strtotime($to_date)) ?>" readonly style="background-color: white !important;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" id="btnFilterLuong" class="btn btn-info w-100 shadow-sm text-white">
+                                        <i class="bi bi-filter me-1"></i> Lọc dữ liệu
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-hover" id="tableLuong">
-                                <thead class="table-light">
+                            <table class="table table-hover align-middle table-striped" id="tableLuong">
+                                <thead class="table-light text-nowrap">
                                     <tr>
-                                        <th>STT</th>
+                                        <th class="text-center">STT</th>
                                         <th>Mã lương</th>                                        
                                         <th>Họ tên</th>
-                                        <th>Chức vụ</th>
                                         <th>Lương cơ bản</th>
-                                        <th>Ngày công</th>
-                                        <th>Tạm ứng</th>
-                                        <th>Phụ cấp</th>
-                                        <th>Khoản trừ</th>
-                                        <th>Thực lãnh</th>
-                                        <th class="text-center">Hành động</th>
+                                        <th class="text-center">Công</th>
+                                        <th class="text-end">Tạm ứng</th>
+                                        <th class="text-end">Phụ cấp</th>
+                                        <th class="text-end">Khoản trừ</th>
+                                        <th class="text-end">Thực lãnh</th>
+                                        <th class="text-center">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php $stt = 1; foreach ($arrLuong as $l): ?>
                                     <tr>
-                                        <td><?= $stt++ ?></td>
-                                        <td><?= htmlspecialchars($l['ma_luong']) ?></td>
+                                        <td class="text-center"><?= $stt++ ?></td>
+                                        <td>
+                                             <span class="badge bg-light-secondary text-secondary">
+                                                <i class="bi bi-upc me-1"></i><?= htmlspecialchars($l['ma_luong']) ?>
+                                            </span>
+                                        </td>
                                         
-                                        <td><?= htmlspecialchars($l['hoten']) ?></td>
-                                        <td><?= htmlspecialchars($l['chucvu']) ?></td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold"><?= htmlspecialchars($l['hoten']) ?></span>
+                                                <small class="text-muted fst-italic"><?= htmlspecialchars($l['chucvu']) ?></small>
+                                            </div>
+                                        </td>
                                         <td class="text-end"><?= number_format($l['luong_coban']) ?></td>
-                                        <td class="text-center"><?= htmlspecialchars($l['ngay_cong']) ?></td>
+                                        <td class="text-center fw-bold bg-light text-primary"><?= htmlspecialchars($l['ngay_cong']) ?></td>
                                         <td class="text-end text-warning"><?= number_format($l['tam_ung']) ?></td>
                                         <td class="text-end text-success"><?= number_format($l['phu_cap']) ?></td>
                                         <td class="text-end text-danger"><?= number_format($l['khoan_tru']) ?></td>
-                                        <td class="text-end fw-bold text-primary"><?= number_format($l['thuc_lanh']) ?></td>
+                                        <td class="text-end fw-bold text-primary fs-6"><?= number_format($l['thuc_lanh']) ?></td>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-outline-info me-1 btn-view-luong"
-                                                     data-id="<?= $l['id'] ?>">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                            <a href="luong.php?idEdit=<?= $l['id'] ?><?php echo $redirect_query_string; ?>" class="btn btn-sm btn-outline-primary me-1">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-luong"
-                                                     data-id="<?= $l['id'] ?><?php echo $redirect_query_string; ?>" data-name="<?= htmlspecialchars($l['hoten'], ENT_QUOTES) ?>">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-info btn-view-luong shadow-sm"
+                                                        data-id="<?= $l['id'] ?>" title="Xem chi tiết">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <a href="luong.php?idEdit=<?= $l['id'] ?><?php echo $redirect_query_string; ?>" 
+                                                   class="btn btn-sm btn-outline-warning shadow-sm" title="Chỉnh sửa">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete-luong shadow-sm"
+                                                        title="Xóa"
+                                                        data-id="<?= $l['id'] ?><?php echo $redirect_query_string; ?>" 
+                                                        data-name="<?= htmlspecialchars($l['hoten'], ENT_QUOTES) ?> - Tháng <?= htmlspecialchars($l['thang_nam'] ?? '') ?>">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -291,11 +358,11 @@ include('./view/luong-view-action.php');
 <div class="modal fade" id="luongDetailModal" tabindex="-1" aria-labelledby="luongDetailModalLabel" aria-hidden="true" style="z-index: 9999;">
     <div class="modal-dialog modal-xl modal-dialog-scrollable"> 
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="luongDetailModalLabel"><i class="bi bi-file-text me-2"></i> Chi tiết Bảng Lương</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="luongDetailModalLabel"><i class="bi bi-file-earmark-text me-2"></i> Chi tiết Bảng Lương</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
 			
                 <div id="loadingContent" class="text-center text-muted"></div>
                 <div class="row mb-4 border-bottom pb-2">
@@ -371,6 +438,27 @@ include('./view/luong-view-action.php');
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+    // ----------------------------------------------------
+    // 0. KHỞI TẠO CHOICES.JS
+    // ----------------------------------------------------
+    const selectElements = [
+        document.getElementById('selectPhongBan'),
+        document.getElementById('selectNhanVien'),
+        document.getElementById('filter_selectPhongBan')
+    ];
+
+    selectElements.forEach(el => {
+        if (el && typeof Choices !== 'undefined') {
+            new Choices(el, {
+                searchEnabled: true,
+                itemSelectText: '',
+                shouldSort: false,
+                placeholder: true,
+                noResultsText: 'Không tìm thấy kết quả',
+            });
+        }
+    });
+
     // ----------------------------------------------------
     // 1. TIỆN ÍCH CHUNG (Định dạng số và hiệu ứng Loading)
     // ----------------------------------------------------

@@ -1,349 +1,502 @@
-<?php 
-	include('./layouts/header.php');
+﻿<?php 
+    include('./layouts/header.php');
 
-	include(__DIR__ . '/connection/config.php');
-	include(__DIR__ . '/models/KhenThuongKyLuat.php');
-	include(__DIR__ . '/models/NhanVien.php');
+    include(__DIR__ . '/connection/config.php');
+    include(__DIR__ . '/models/KhenThuongKyLuat.php');
+    include(__DIR__ . '/models/NhanVien.php');
 
-	$database = new Database();
-	$conn = $database->getConnection();
+    $database = new Database();
+    $conn = $database->getConnection();
 
-	$model = new KhenThuongKyLuat($conn);
-	$nvModel = new NhanVien($conn);
+    $model = new KhenThuongKyLuat($conn);
+    $nvModel = new NhanVien($conn);
 
-	// ck_khenthuong từ GET (1 = khen thưởng, 0 = kỷ luật). Mặc định là 1 (khen thưởng).
-	$ck_khenthuong = isset($_GET['ck_khenthuong']) ? (int)$_GET['ck_khenthuong'] : (isset($_POST['ck_khenthuong']) ? (int)$_POST['ck_khenthuong'] : 1);
+    // ck_khenthuong từ GET (1 = khen thưởng, 0 = kỷ luật). Mặc định là 1 (khen thưởng).
+    $ck_khenthuong = isset($_GET['ck_khenthuong']) ? (int)$_GET['ck_khenthuong'] : (isset($_POST['ck_khenthuong']) ? (int)$_POST['ck_khenthuong'] : 1);
 
-	// Danh sách nhân viên (dùng cho select). Chỉ lấy nhân viên trạng thái = 1 (đang làm)
-	$ds_nv = $nvModel->getAllNV_danglam()->fetchAll(PDO::FETCH_ASSOC);
+    // Danh sách nhân viên (dùng cho select). Chỉ lấy nhân viên trạng thái = 1 (đang làm)
+    $stmtNV = $nvModel->getAllNV_danglam();
+    $ds_nv = $stmtNV ? $stmtNV->fetchAll(PDO::FETCH_ASSOC) : [];
 
-	// Lấy danh sách bản ghi để hiển thị (lọc theo ck nếu muốn)
-	$stmt = $model->getAll($ck_khenthuong);
-	$arrShow = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    // Lấy danh sách bản ghi để hiển thị
+    $stmt = $model->getAll($ck_khenthuong);
+    $arrShow = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-	// Lấy 1 bản ghi khi edit
-	$idEdit = $_GET['idEdit'] ?? null;
-	$ktklInfo = null;
-	if ($idEdit) {
-		$ktklInfo = $model->getById((int)$idEdit);
-	}
+    // Lấy 1 bản ghi khi edit
+    $idEdit = $_GET['idEdit'] ?? null;
+    $ktklInfo = null;
+    if ($idEdit) {
+        $ktklInfo = $model->getById((int)$idEdit);
+        // Nếu đang edit, cập nhật lại ck_khenthuong theo bản ghi đang edit để tránh nhầm tab
+        if ($ktklInfo) {
+            $ck_khenthuong = $ktklInfo['ck_khenthuong'];
+        }
+    }
 
-	$isKhenThuong = ($ck_khenthuong == 1);
-	$title = $isKhenThuong ? "Tạo khen thưởng" : "Tiến hành kỷ luật";
-	$title_sua = $isKhenThuong ? "khen thưởng" : "kỷ luật";
-	$prefix = $isKhenThuong ? "KT" : "KL";
-	$ma_ktkl = $prefix . time();
-	$row_acc = $_SESSION['user'] ?? [];
+    $isKhenThuong = ($ck_khenthuong == 1);
+    $title = $isKhenThuong ? "Khen thưởng" : "Kỷ luật";
+    $prefix = $isKhenThuong ? "KT" : "KL";
+    $ma_ktkl = $prefix . time(); // Mã mặc định khi thêm mới
 ?>
 
 <div class="page-heading">
-<section id="basic-vertical-layouts">
-    
-    <!-- FORM NHẬP / SỬA -->
-	
-    <div class="card shadow-sm border-0 mb-4" <?php if($ke_toan){ ?> style="display: none;"  <?php }?>>
-      
-        <div class="card-body">
-		
-		<div class="d-flex justify-content-between align-items-center mb-3">
-			<h4 class="fw-bold text-primary mb-0 mt-2">
-				<i class="bi bi-person-plus-fill me-2"></i>
-                <?= isset($idEdit) ? "Cập nhật $title_sua" : "$title" ?>
-			</h4>					
-		</div>
-		
-            <form method="post" action="action/khen-thuong-ky-luat-action.php" class="validate-tooltip mt-2" id="ktklForm">
-                <input type="hidden" name="id" value="<?= $ktklInfo['id'] ?? '' ?>">
-                <input type="hidden" name="ck_khenthuong" value="<?= $ck_khenthuong ?>">
-
-                <div class="row g-3">
-                    <div class="col-md-2">
-                        <label class="form-label">Mã <?= strtolower($title_sua) ?></label>
-                        <input type="text" name="ma_ktkl" class="form-control" 
-                               value="<?= $ktklInfo['ma_ktkl'] ?? $ma_ktkl ?>" readonly>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Tên <?= $isKhenThuong ? "khen thưởng" : "kỷ luật" ?> <span class="text-danger">*</span></label>
-                        <input type="text" name="ten_ktkl" class="form-control" required 
-                               value="<?= htmlspecialchars($ktklInfo['ten_ktkl'] ?? '') ?>">
-                    </div>
-
-                    <div class="col-md-5">
-                        <label class="form-label">Nhân viên <span class="text-danger">*</span></label>
-                        <select name="id_nv" id="id_nv" class="form-select" required>
-                            <option value="">-- Chọn nhân viên --</option>
-                            <?php foreach ($ds_nv as $nv): ?>
-                                
-                                    <option value="<?= $nv['id'] ?>" <?= ($ktklInfo['id_nv'] ?? '') == $nv['id'] ? 'selected' : '' ?>>
-                                        (<?= htmlspecialchars($nv['ma_nv']) ?>) <?= htmlspecialchars($nv['hoten']) ?> |  <?= htmlspecialchars($nv['phongban']) ?> | <?= htmlspecialchars($nv['chucvu']) ?>
-                                    </option>
-                                
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Số tiền <?= $isKhenThuong ? "khen thưởng" : "kỷ luật" ?></label>
-                        <input type="text" id="so_tien_display" class="form-control" placeholder="0" 
-                               value="<?= number_format(floatval($ktklInfo['so_tien'] ?? 0)) ?>">
-                        <input type="hidden" id="so_tien" name="so_tien" 
-                               value="<?= $ktklInfo['so_tien'] ?? 0 ?>">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Hình thức</label>
-                        <input type="text" name="hinh_thuc" class="form-control" 
-                               value="<?= htmlspecialchars($ktklInfo['hinh_thuc'] ?? '') ?>">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label"><?= $isKhenThuong ? "Ngày quyết định khen thưởng" : "Ngày quyết định kỷ luật" ?></label>
-                        <input type="date" name="ngayqd" class="form-control" 
-                               value="<?= $ktklInfo['ngayqd'] ?? date('Y-m-d') ?>">
-                    </div>
-
-                    <div class="col-md-5">
-                        <label class="form-label">Nội dung  <?=$title_sua ?></label>
-                        <textarea name="noidung" rows="2" class="form-control"><?= htmlspecialchars($ktklInfo['noidung'] ?? '') ?></textarea>
-                    </div>
-                </div>
-
-                <div class="mt-3 d-flex justify-content-end">
-                    <?php if (!empty($ktklInfo)): ?>
-                        <button type="submit" name="update" class="btn btn-primary me-2">
-                            <i class="bi bi-save"></i> Cập nhật <?=$title_sua ?>
-                        </button>
-                    <?php else: ?>
-                        <button type="submit" name="add" class="btn btn-success me-2">
-                            <i class="bi bi-plus-circle"></i> <?=$title ?>
-                        </button>
-                    <?php endif; ?>
-                    <a href="khen-thuong-ky-luat.php?ck_khenthuong=<?= $ck_khenthuong ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-clockwise"></i> Làm mới
-                    </a>
-                </div>
-            </form>
+    <div class="page-title mb-3">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>Quản lý Khen thưởng & Kỷ luật</h3>
+                <p class="text-subtitle text-muted">Ghi nhận thành tích hoặc xử lý vi phạm của nhân viên.</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?= $title ?></li>
+                    </ol>
+                </nav>
+            </div>
         </div>
     </div>
-	
-    <!-- DANH SÁCH -->
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <h5 class="fw-bold text-primary mb-3">📋 Danh sách <?= $isKhenThuong ? "khen thưởng" : "kỷ luật" ?></h5>
 
-            <table class="table table-hover align-middle" id="tableKTKL">
-                <thead class="table-light">
-                    <tr>
-						<th>STT</th>
-                        <th>Mã</th>
-                        <th>Tên  <?=$title_sua ?></th>
-                        <th>Nhân viên</th>
-                        <th>Số tiền</th>
-                        <th>Hình thức</th>
-                        <th>Nội dung</th>
-						<th>Người tạo</th>
-						<th>Ngày quyết định</th>
-                        <th class="text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-					$stt = 1;
-					foreach ($arrShow as $row): ?>
-                    <tr>
-						<td class="text-start"><?= htmlspecialchars($stt) ?></td>
-                        <td class="text-start"><?= htmlspecialchars($row['ma_ktkl']) ?></td>
-                        <td class="text-start"><?= htmlspecialchars($row['ten_ktkl']) ?></td>
-                        <td class="text-start"><?= htmlspecialchars($row['nhanvien_name']) ?></td>
-                        <td class="text-start"><?= number_format(floatval($row['so_tien'] ?? 0)) ?></td>
-                        <td class="text-start"><?= htmlspecialchars($row['hinh_thuc']) ?></td>
-                        <td class="text-start"><?= htmlspecialchars($row['noidung']) ?></td>
-						<td class="text-start"><?= htmlspecialchars($row['nguoitao']) ?></td>
-						<td class="text-start"><?= date('d/m/Y', strtotime($row['ngayqd'])) ?></td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-success btn-view" 
-                                    data-bs-toggle="modal" data-bs-target="#viewModal"
-                                    data-ma="<?= htmlspecialchars($row['ma_ktkl']) ?>"
-                                    data-ten="<?= htmlspecialchars($row['ten_ktkl']) ?>"
-                                    data-nv="<?= htmlspecialchars($row['nhanvien_name']) ?>"
-                                    data-so="<?= number_format(floatval($row['so_tien'] ?? 0)) ?>"
-                                    data-ht="<?= htmlspecialchars($row['hinh_thuc']) ?>"
-                                    data-nd="<?= htmlspecialchars($row['noidung']) ?>"
-                                    data-ngay="<?= htmlspecialchars($row['ngayqd']) ?>"
-                                    data-anh="<?= htmlspecialchars($row['anhdaidien'] ?? 'default.png') ?>"
-                                    data-sdt="<?= htmlspecialchars($row['sodt'] ?? '') ?>"
-                                    data-email="<?= htmlspecialchars($row['email'] ?? '') ?>"
-                                    data-cv="<?= htmlspecialchars($row['chuc_vu'] ?? '') ?>"
-                                    data-pb="<?= htmlspecialchars($row['phong_ban'] ?? '') ?>"
-                                    data-gt="<?= htmlspecialchars($row['gtinh'] ?? '') ?>">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-								<?php if(!$ke_toan){ ?>
-                                <a href="khen-thuong-ky-luat.php?ck_khenthuong=<?= $ck_khenthuong ?>&idEdit=<?= $row['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete" 
-                                    data-id="<?= $row['id'] ?>" data-name="<?= htmlspecialchars($row['ten_ktkl']) ?>" data-ck="<?= $ck_khenthuong ?>">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-								<?php }?>
+    <section id="basic-vertical-layouts">
+        <!-- Tabs chuyển đổi -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav nav-pills shadow-sm bg-white p-2 rounded">
+                    <li class="nav-item">
+                        <a class="nav-link <?= $isKhenThuong ? 'active' : '' ?>" href="khen-thuong-ky-luat.php?ck_khenthuong=1">
+                            <i class="bi bi-trophy-fill me-2"></i>Khen thưởng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= !$isKhenThuong ? 'active bg-danger text-white' : 'text-danger' ?>" href="khen-thuong-ky-luat.php?ck_khenthuong=0">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Kỷ luật
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row match-height">
+            <!-- Form Card -->
+            <div class="col-12 <?php if($ke_toan) echo 'd-none'; ?>">
+                <div class="card shadow border-0 mb-4">
+                    <div class="card-header bg-white border-bottom">
+                         <h5 class="fw-bold text-primary mb-0">
+                            <i class="<?= isset($idEdit) ? 'bi bi-pencil-square' : 'bi bi-plus-circle' ?> me-2"></i>
+                            <?= isset($idEdit) ? "Cập nhật quyết định $title" : "Tạo quyết định $title bản mới" ?>
+                        </h5>
+                    </div>
+                    <div class="card-body mt-3">
+                        <form method="post" action="action/khen-thuong-ky-luat-action.php" class="validate-tooltip" id="ktklForm">
+                            <input type="hidden" name="id" value="<?= $ktklInfo['id'] ?? '' ?>">
+                            <input type="hidden" name="ck_khenthuong" value="<?= $ck_khenthuong ?>">
+
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Mã quyết định</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-upc-scan"></i></span>
+                                        <input type="text" name="ma_ktkl" class="form-control bg-light" 
+                                            value="<?= $ktklInfo['ma_ktkl'] ?? $ma_ktkl ?>" readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-5 mb-3">
+                                    <label class="fw-bold mb-1">Tiêu đề quyết định <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
+                                        <input type="text" name="ten_ktkl" class="form-control" required 
+                                            placeholder="VD: Khen thưởng nhân viên xuất sắc..."
+                                            value="<?= htmlspecialchars($ktklInfo['ten_ktkl'] ?? '') ?>">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="fw-bold mb-1">Người nhận <span class="text-danger">*</span></label>
+                                    <select name="id_nv" id="selectNhanVien" class="form-select" required>
+                                        <option value="">-- Chọn nhân viên --</option>
+                                        <?php 
+                                        $selected_id_nv = $ktklInfo['id_nv'] ?? '';
+                                        foreach ($ds_nv as $nv): 
+                                            $isSelected = ($selected_id_nv == $nv['id']) ? 'selected' : '';
+                                        ?>
+                                            <option value="<?= $nv['id'] ?>" <?= $isSelected ?>>
+                                                (<?= htmlspecialchars($nv['ma_nv']) ?>) <?= htmlspecialchars($nv['hoten']) ?> | <?= htmlspecialchars($nv['phongban'] ?? 'N/A') ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Số tiền (VNĐ)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text text-success fw-bold"><i class="bi bi-cash"></i></span>
+                                        <input type="text" id="so_tien_display" class="form-control text-end fw-bold text-success" 
+                                            placeholder="0" 
+                                            value="<?= number_format(floatval($ktklInfo['so_tien'] ?? 0)) ?>">
+                                        <input type="hidden" id="so_tien" name="so_tien" 
+                                            value="<?= $ktklInfo['so_tien'] ?? 0 ?>">
+                                        <span class="input-group-text"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Hình thức</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                        <input type="text" name="hinh_thuc" class="form-control" 
+                                            placeholder="VD: Tiền, Bằng khen..."
+                                            value="<?= htmlspecialchars($ktklInfo['hinh_thuc'] ?? '') ?>">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label class="fw-bold mb-1">Ngày quyết định</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" name="ngayqd" class="form-control" 
+                                            value="<?= $ktklInfo['ngayqd'] ?? date('Y-m-d') ?>">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="fw-bold mb-1">Nội dung chi tiết</label>
+                                    <textarea name="noidung" rows="3" class="form-control" placeholder="Mô tả chi tiết lý do..."><?= htmlspecialchars($ktklInfo['noidung'] ?? '') ?></textarea>
+                                </div>
+                                
+                                <div class="col-12 d-flex justify-content-end">
+                                    <a href="khen-thuong-ky-luat.php?ck_khenthuong=<?= $ck_khenthuong ?>" class="btn btn-light-secondary shadow-sm me-2">
+                                        <i class="bi bi-arrow-clockwise me-1"></i> Hủy / Làm mới
+                                    </a>
+                                    <?php if (!empty($ktklInfo)): ?>
+                                        <button type="submit" name="update" class="btn btn-primary shadow-sm px-4">
+                                            <i class="bi bi-save me-1"></i> Lưu thay đổi
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="submit" name="add" class="btn btn-success shadow-sm px-4">
+                                            <i class="bi bi-plus-lg me-1"></i> Tạo quyết định
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    <?php 
-					$stt++;
-					endforeach; ?>
-                </tbody>
-            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Card -->
+            <div class="col-12">
+                <div class="card shadow border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                             <h5 class="fw-bold text-primary mb-0">
+                                <i class="bi bi-list-check me-2"></i>Danh sách <?= $title ?>
+                            </h5>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="tableKTKL">
+                                <thead class="table-light text-nowrap">
+                                    <tr>
+                                        <th class="text-center">STT</th>
+                                        <th>Mã QĐ</th>
+                                        <th>Tiêu đề</th>
+                                        <th>Nhân viên</th>
+                                        <th class="text-end">Số tiền</th>
+                                        <th>Hình thức</th>
+                                        <th>Ngày QĐ</th>
+                                        <th class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php 
+                                    $stt = 1;
+                                    foreach ($arrShow as $row): 
+                                        $money = floatval($row['so_tien'] ?? 0);
+                                    ?>
+                                    <tr>
+                                        <td class="text-center"><?= $stt++ ?></td>
+                                        <td><span class="badge bg-light text-dark border"><?= htmlspecialchars($row['ma_ktkl']) ?></span></td>
+                                        
+                                        <td style="max-width: 250px;">
+                                            <div class="fw-bold text-truncate" title="<?= htmlspecialchars($row['ten_ktkl']) ?>">
+                                                <?= htmlspecialchars($row['ten_ktkl']) ?>
+                                            </div>
+                                            <small class="text-muted text-truncate d-block" style="max-width: 200px;">
+                                                <?= htmlspecialchars($row['noidung'] ?? '') ?>
+                                            </small>
+                                        </td>
+                                        
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2">
+                                                    <img src="uploads/nhanvien/<?= !empty($row['anhdaidien']) ? $row['anhdaidien'] : 'default.png' ?>" alt="avatar" class="rounded-circle">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold"><?= htmlspecialchars($row['nhanvien_name']) ?></div>
+                                                    <small class="text-muted"><?= htmlspecialchars($row['phong_ban'] ?? '') ?></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <td class="text-end fw-bold <?= $money > 0 ? ($isKhenThuong ? 'text-success' : 'text-danger') : 'text-muted' ?>">
+                                            <?= number_format($money) ?> 
+                                        </td>
+                                        
+                                        <td><?= htmlspecialchars($row['hinh_thuc']) ?></td>
+                                        <td><?= date('d/m/Y', strtotime($row['ngayqd'])) ?></td>
+                                        
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-info shadow-sm btn-view" 
+                                                    title="Xem chi tiết"
+                                                    data-bs-toggle="modal" data-bs-target="#viewModal"
+                                                    data-ma="<?= htmlspecialchars($row['ma_ktkl']) ?>"
+                                                    data-ten="<?= htmlspecialchars($row['ten_ktkl']) ?>"
+                                                    data-nv="<?= htmlspecialchars($row['nhanvien_name']) ?>"
+                                                    data-so="<?= number_format($money) ?>"
+                                                    data-ht="<?= htmlspecialchars($row['hinh_thuc']) ?>"
+                                                    data-nd="<?= htmlspecialchars($row['noidung']) ?>"
+                                                    data-ngay="<?= date('d/m/Y', strtotime($row['ngayqd'])) ?>"
+                                                    data-anh="<?= htmlspecialchars($row['anhdaidien'] ?? 'default.png') ?>"
+                                                    data-sdt="<?= htmlspecialchars($row['sodt'] ?? 'N/A') ?>"
+                                                    data-email="<?= htmlspecialchars($row['email'] ?? 'N/A') ?>"
+                                                    data-cv="<?= htmlspecialchars($row['chuc_vu'] ?? 'N/A') ?>"
+                                                    data-pb="<?= htmlspecialchars($row['phong_ban'] ?? 'N/A') ?>"
+                                                    data-gt="<?= htmlspecialchars($row['gtinh'] == 1 ? 'Nam' : 'Nữ') ?>">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                
+                                                <?php if(!$ke_toan): ?>
+                                                <a href="khen-thuong-ky-luat.php?ck_khenthuong=<?= $ck_khenthuong ?>&idEdit=<?= $row['id'] ?>" class="btn btn-sm btn-outline-warning shadow-sm" title="Sửa">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger shadow-sm btn-delete" 
+                                                    title="Xóa"
+                                                    data-id="<?= $row['id'] ?>" 
+                                                    data-name="<?= htmlspecialchars($row['ten_ktkl']) ?>" 
+                                                    data-ck="<?= $ck_khenthuong ?>">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 </div>
 
 <!-- MODAL XEM CHI TIẾT -->
 <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title fw-bold text-primary">
-            <i class="bi bi-info-circle"></i> Chi tiết <?= strtolower($title) ?>
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold">
+            <i class="bi bi-info-circle me-2"></i>Chi tiết Quyết định
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body bg-light">
         <!-- Thông tin nhân viên -->
-        <div class="border-bottom pb-3 mb-3">
-          <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-person-badge me-2"></i>Thông tin nhân viên</h6>
-          <div class="d-flex align-items-center">
-            <img id="v_anh" src="assets/images/default-avatar.php" class="rounded border me-3" style="width: 80px; height: 100px; object-fit: cover;">
-            <div>
-              <p class="mb-1"><strong>Tên:</strong> <span id="v_nv"></span></p>
-              <p class="mb-1"><strong>Giới tính:</strong> <span id="v_gt"></span></p>
-              <p class="mb-1"><strong>Chức vụ:</strong> <span id="v_cv"></span></p>
-              <p class="mb-1"><strong>Phòng ban:</strong> <span id="v_pb"></span></p>
-              <p class="mb-1"><strong>SĐT:</strong> <span id="v_sdt"></span></p>
-              <p class="mb-1"><strong>Email:</strong> <span id="v_email"></span></p>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="bi bi-person-badge me-2"></i>Thông tin nhân viên</h6>
+                <div class="d-flex align-items-start">
+                    <img id="v_anh" src="assets/images/default.png" class="rounded border me-4 shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="row">
+                            <div class="col-md-6 mb-2"><strong>Họ tên:</strong> <span id="v_nv" class="text-primary fw-bold"></span></div>
+                            <div class="col-md-6 mb-2"><strong>Giới tính:</strong> <span id="v_gt"></span></div>
+                            <div class="col-md-6 mb-2"><strong>Chức vụ:</strong> <span id="v_cv"></span></div>
+                            <div class="col-md-6 mb-2"><strong>Phòng ban:</strong> <span id="v_pb"></span></div>
+                            <div class="col-md-6 mb-2"><strong>SĐT:</strong> <span id="v_sdt"></span></div>
+                            <div class="col-md-6 mb-2"><strong>Email:</strong> <span id="v_email"></span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
 
-        <!-- Thông tin khen thưởng / kỷ luật -->
-        <div>
-          <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-award me-2"></i>Thông tin <?= strtolower($title) ?></h6>
-          <table class="table table-sm table-borderless">
-            <tr><th>Mã:</th><td id="v_ma"></td></tr>
-            <tr><th>Tên:</th><td id="v_ten"></td></tr>
-            <tr><th>Số tiền:</th><td id="v_so"></td></tr>
-            <tr><th>Hình thức:</th><td id="v_ht"></td></tr>
-            <tr><th><?= $isKhenThuong ? "Ngày khen thưởng" : "Ngày kỷ luật" ?>:</th><td id="v_ngay"></td></tr>
-            <tr><th>Nội dung:</th><td id="v_nd"></td></tr>
-          </table>
+        <!-- Thông tin quyết định -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="bi bi-file-earmark-text me-2"></i>Nội dung Quyết định</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0">
+                        <tr>
+                            <th class="bg-light w-25">Mã QĐ</th>
+                            <td id="v_ma" class="fw-bold text-dark"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Tiêu đề</th>
+                            <td id="v_ten" class="fw-bold text-primary"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Số tiền</th>
+                            <td id="v_so" class="fw-bold text-danger"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Hình thức</th>
+                            <td id="v_ht"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Ngày QĐ</th>
+                            <td id="v_ngay"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Nội dung</th>
+                            <td id="v_nd" style="white-space: pre-line;"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
       </div>
     </div>
   </div>
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-	const table = document.querySelector("#tableKTKL");
-    if (table) new simpleDatatables.DataTable(table);
+    // 1. Datatable
+    const table = document.querySelector("#tableKTKL");
+    if (table) {
+        new simpleDatatables.DataTable(table, {
+             labels: {
+                placeholder: "Tìm kiếm...",
+                perPage: "mục/trang",
+                noRows: "Không có dữ liệu",
+                info: "Hiển thị {start} đến {end} của {rows} mục",
+            }
+        });
+    }
     
-    // Số tiền: tự format dấu phẩy khi nhập
+    // 2. Choices.js
+    const selectNhanVien = document.getElementById('selectNhanVien');
+    if (selectNhanVien) {
+        new Choices(selectNhanVien, {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: 'Tìm kiếm nhân viên...',
+            noResultsText: 'Không tìm thấy kết quả',
+        });
+    }
+
+    // 3. Auto Format Money
     const display = document.getElementById('so_tien_display');
     const hidden = document.getElementById('so_tien');
     
     if (display) {
+        // Format on load
+        if (display.value) {
+            let val = display.value.replace(/,/g, '');
+            if (!isNaN(val) && val !== '') {
+                 display.value = Number(val).toLocaleString('en-US');
+            }
+        }
+
         display.addEventListener('input', function () {
             let val = this.value.replace(/,/g, '');
+            // Chỉ giữ lại số
+            val = val.replace(/[^0-9.]/g, ''); 
+            
             if (!isNaN(val) && val !== '') {
-                this.value = Number(val).toLocaleString('en-US');
-                hidden.value = val;
+                this.value = Number(val).toLocaleString('en-US'); // Format hiển thị
+                hidden.value = val; // Lưu giá trị thực
             } else {
                 hidden.value = '';
             }
         });
     }
 
-    // ----------------------------------------------------
-    // LOGIC SỰ KIỆN ĐỘNG (XEM và XÓA) - SỬ DỤNG EVENT DELEGATION
-    // ----------------------------------------------------
-    document.addEventListener('click', function(e) {
-
-        // --- A. XỬ LÝ NÚT XEM CHI TIẾT (.btn-view) ---
-        // Do bạn đã sử dụng data-bs-toggle="modal", logic chính chỉ cần điền dữ liệu
-        const btnView = e.target.closest('.btn-view');
-        if (btnView) {
-            // e.preventDefault() là không cần thiết vì đã có data-bs-toggle
+    // 4. Modal View - Event Delegation
+    const modalReview = document.getElementById('viewModal');
+    if (modalReview) {
+        modalReview.addEventListener('show.bs.modal', function (event) {
+            // Button trigger modal
+            const button = event.relatedTarget;
             
-            // Lấy dữ liệu và điền vào Modal
-            document.getElementById('v_ma').textContent = btnView.dataset.ma;
-            document.getElementById('v_ten').textContent = btnView.dataset.ten;
-            document.getElementById('v_nv').textContent = btnView.dataset.nv;
-            document.getElementById('v_so').textContent = btnView.dataset.so;
-            document.getElementById('v_ht').textContent = btnView.dataset.ht;
-            document.getElementById('v_nd').textContent = btnView.dataset.nd;
-            document.getElementById('v_ngay').textContent = btnView.dataset.ngay;
-            document.getElementById('v_sdt').textContent = btnView.dataset.sdt;
-            document.getElementById('v_email').textContent = btnView.dataset.email;
-            document.getElementById('v_cv').textContent = btnView.dataset.cv;
-            document.getElementById('v_pb').textContent = btnView.dataset.pb;
-            document.getElementById('v_gt').textContent = btnView.dataset.gt;
-            document.getElementById('v_anh').src = `uploads/nhanvien/${btnView.dataset.anh}`;
+            // Extract info from data-* attributes
+            const ma = button.getAttribute('data-ma');
+            const ten = button.getAttribute('data-ten');
+            const nv = button.getAttribute('data-nv');
+            const so = button.getAttribute('data-so');
+            const ht = button.getAttribute('data-ht');
+            const nd = button.getAttribute('data-nd');
+            const ngay = button.getAttribute('data-ngay');
+            const sdt = button.getAttribute('data-sdt');
+            const email = button.getAttribute('data-email');
+            const cv = button.getAttribute('data-cv');
+            const pb = button.getAttribute('data-pb');
+            const gt = button.getAttribute('data-gt');
+            const anh = button.getAttribute('data-anh');
 
-            // Nút xem đã hoạt động ổn do sử dụng thuộc tính data-bs-toggle, 
-            // nhưng logic điền dữ liệu cần chuyển sang Event Delegation.
-            // Nếu bạn muốn mở Modal bằng JS thay vì HTML:
-            // const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
-            // viewModal.show();
-        }
+            // Update the modal's content.
+            const modal = this;
+            modal.querySelector('#v_ma').textContent = ma;
+            modal.querySelector('#v_ten').textContent = ten;
+            modal.querySelector('#v_nv').textContent = nv;
+            modal.querySelector('#v_so').textContent = so + ' ';
+            modal.querySelector('#v_ht').textContent = ht;
+            modal.querySelector('#v_nd').textContent = nd;
+            modal.querySelector('#v_ngay').textContent = ngay;
+            
+            modal.querySelector('#v_sdt').textContent = sdt;
+            modal.querySelector('#v_email').textContent = email;
+            modal.querySelector('#v_cv').textContent = cv;
+            modal.querySelector('#v_pb').textContent = pb;
+            modal.querySelector('#v_gt').textContent = gt;
+            
+            modal.querySelector('#v_anh').src = `uploads/nhanvien/${anh}`;
+        });
+    }
 
-        // --- B. XỬ LÝ NÚT XÓA (.btn-delete) ---
+    // 5. Delete Confirmation
+    document.addEventListener('click', function(e) {
         const btnDelete = e.target.closest('.btn-delete');
         if (btnDelete) {
             e.preventDefault();
-            
             const id = btnDelete.dataset.id;
             const name = btnDelete.dataset.name;
-            const ck = btnDelete.dataset.ck; // ck_khenthuong
+            const ck = btnDelete.dataset.ck; 
 
-            // Kiểm tra Swal trước khi sử dụng
-            if (typeof Swal === 'undefined') {
-                if (confirm(`Bạn có chắc muốn xóa mục "${name}" không?`)) {
-                    window.location.href = `action/khen-thuong-ky-luat-action.php?delete=${id}&ck_khenthuong=${ck}`;
-                }
-                return;
-            }
-
-            Swal.fire({
+            const confirmOptions = {
                 title: 'Xác nhận xóa?',
-                text: `Bạn có chắc muốn xóa mục "${name}" không?`,
+                html: `Bạn có chắc chắn muốn xóa bản ghi <b>"${name}"</b> không?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Có, xóa",
-                cancelButtonText: "Hủy",
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: '<i class="bi bi-trash"></i> Xóa ngay',
+                cancelButtonText: 'Hủy bỏ',
                 reverseButtons: true
-            }).then(result => {
-                if (result.isConfirmed) {
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire(confirmOptions).then(result => {
+                    if (result.isConfirmed) {
+                         window.location.href = `action/khen-thuong-ky-luat-action.php?delete=${id}&ck_khenthuong=${ck}`;
+                    }
+                });
+            } else {
+                 if (confirm(`Xóa bản ghi "${name}"?`)) {
                     window.location.href = `action/khen-thuong-ky-luat-action.php?delete=${id}&ck_khenthuong=${ck}`;
                 }
-            });
+            }
         }
     });
-	
-	// Tạo search cho selection ***********************************
-	new Choices('#id_nv', {
-        searchEnabled: true,
-        itemSelectText: '',   // tắt chữ "Press to select"
-        shouldSort: false     // giữ nguyên thứ tự
-    });
-	// ***********************************
 
 });
 </script>

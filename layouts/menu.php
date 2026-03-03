@@ -38,6 +38,13 @@
 								<span>Thêm nhân viên</span>
 							</a>
 						</li>
+                        <!-- 2.1b. Import Excel -->
+                        <li class="sidebar-item no-submenu">
+                            <a href="import-nhanvien-tu-file.php" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-spreadsheet"></i>
+                                <span>Nhập từ Excel</span>
+                            </a>
+                        </li>
 						<?php }?>
 						<!-- 2.2. Danh sách nhân viên -->
 						<li class="sidebar-item no-submenu">
@@ -117,12 +124,12 @@
                     </a>					
 							<ul class="submenu <?= $is_thiet_lap_ns_active ? 'active' : ''; ?>">
 								<li class="submenu-item"><a href="phong-ban.php"><i class="bi bi-building"></i> Phòng ban</a></li>
-								<li class="submenu-item"><a href="chuc-vu.php"><i class="bi bi-award"></i> Chức vụ</a></li>
-								<li class="submenu-item"><a href="trinh-do.php"><i class="bi bi-journal-bookmark-fill"></i> Trình độ</a></li>
-								<li class="submenu-item"><a href="chuyen-mon.php"><i class="bi bi-book"></i> Chuyên môn</a></li>
-								<li class="submenu-item"><a href="loai-nhanvien.php"><i class="bi bi-person-badge-fill"></i> Loại nhân viên</a></li>
-								<li class="submenu-item"><a href="quoc-tich.php"><i class="bi bi-flag-fill"></i> Quốc tịch</a></li>
-								<li class="submenu-item"><a href="ton-giao.php"><i class="bi bi-journal"></i> Tôn giáo</a></li>
+								<li class="submenu-item"><a href="chuc-vu.php"><i class="bi bi-person-badge"></i> Chức vụ</a></li>
+								<li class="submenu-item"><a href="trinh-do.php"><i class="bi bi-award"></i> Trình độ</a></li>
+								<li class="submenu-item"><a href="chuyen-mon.php"><i class="bi bi-briefcase"></i> Chuyên môn</a></li>
+								<li class="submenu-item"><a href="loai-nhanvien.php"><i class="bi bi-tags"></i> Loại nhân viên</a></li>
+								<li class="submenu-item"><a href="quoc-tich.php"><i class="bi bi-globe"></i> Quốc tịch</a></li>
+								<li class="submenu-item"><a href="ton-giao.php"><i class="bi bi-moon-stars"></i> Tôn giáo</a></li>
 								<li class="submenu-item"><a href="dan-toc.php"><i class="bi bi-people"></i> Dân tộc</a></li>
 								<li class="submenu-item"><a href="hon-nhan.php"><i class="bi bi-heart-fill"></i> Hôn nhân</a></li>
 							</ul>
